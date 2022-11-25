@@ -1,0 +1,45 @@
+import { ProductService } from './../product.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Product } from '../product.model';
+import { lastValueFrom, Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-product-update',
+  templateUrl: './product-update.component.html',
+  styleUrls: ['./product-update.component.css']
+})
+export class ProductUpdateComponent implements OnInit {
+  product: Product;
+
+  constructor(private productService: ProductService, private router: Router, private activeRouter: ActivatedRoute) { }
+
+  async ngOnInit() {
+    this.product = new Product();
+    const id = +this.activeRouter.snapshot.paramMap.get('id');
+    this.productService.readById(id).subscribe(item => { this.product = item })
+
+    const observable = this.productService.readById(id);
+
+    const productLast = await lastValueFrom(observable)
+
+    console.log(productLast)
+  }
+
+  updateProduct(): void {
+    this.productService.update(this.product).subscribe(() => {
+      this.productService.showMessage("Produto alterado com sucesso!")
+      this.router.navigate(["/products"]);
+
+    });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/products'])
+
+  }
+
+}
+
+
+
